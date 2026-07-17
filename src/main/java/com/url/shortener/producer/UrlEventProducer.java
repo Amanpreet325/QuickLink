@@ -1,5 +1,6 @@
 package com.url.shortener.producer;
 
+import com.url.shortener.dto.UrlClickEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
@@ -8,13 +9,13 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class UrlEventProducer {
 
-    private final KafkaTemplate<String,String> kafkaTemplate;
+    private final KafkaTemplate<String, UrlClickEvent> kafkaTemplate;
 
-    public void publish(String message){
+    public void publish(UrlClickEvent event){
 
-        kafkaTemplate.send("url-click-events", message);
+        kafkaTemplate.send("url-click-events", event);
 
-        System.out.println("Sent : " + message);
+        System.out.println("Sent : " + event);
     }
 
 }
