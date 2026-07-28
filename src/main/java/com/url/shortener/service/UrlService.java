@@ -3,6 +3,8 @@ package com.url.shortener.service;
 import com.url.shortener.dto.ShortenRequest;
 import com.url.shortener.dto.UrlClickEvent;
 import com.url.shortener.entity.Url;
+import com.url.shortener.exception.ShortCodeAlreadyExistsException;
+import com.url.shortener.exception.UrlExpiredException;
 import com.url.shortener.producer.UrlEventProducer;
 import com.url.shortener.repository.UrlRepository;
 import lombok.RequiredArgsConstructor;
@@ -39,13 +41,14 @@ public class UrlService {
         }
         if (repository.findByShortCode(shortCode).isPresent()) {
 
-            throw new RuntimeException("Short code already exists.");
+            throw new ShortCodeAlreadyExistsException();
 
         }
         Url url = Url.builder()
                 .shortCode(shortCode)
                 .originalUrl(request.getOriginalUrl())
                 .createdAt(LocalDateTime.now())
+                .expiresAt(request.getExpiresAt())
                 .build();
 
         repository.save(url);
@@ -73,6 +76,11 @@ public class UrlService {
         Url entity = repository.findByShortCode(code)
                 .orElseThrow();
 
+        if (entity.getExpiresAt() != null &&
+                entity.getExpiresAt().isBefore(LocalDateTime.now())) {
+
+            throw new UrlExpiredException();
+        }
 
         redisTemplate.opsForValue()
                 .set(code, entity.getOriginalUrl(), Duration.ofHours(24));

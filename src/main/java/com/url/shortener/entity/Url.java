@@ -26,5 +26,6 @@ public class Url {
     private String originalUrl;
 
     private LocalDateTime createdAt;
+    private LocalDateTime expiresAt;
 
 }
