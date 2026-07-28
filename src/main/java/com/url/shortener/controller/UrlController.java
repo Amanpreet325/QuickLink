@@ -1,5 +1,6 @@
 package com.url.shortener.controller;
 
+import com.url.shortener.dto.ShortenRequest;
 import com.url.shortener.dto.UrlRequest;
 import com.url.shortener.dto.UrlResponse;
 import com.url.shortener.entity.Url;
@@ -27,15 +28,15 @@ public class UrlController {
 
     @PostMapping("/shorten")
     public UrlResponse shorten(
-            @RequestBody UrlRequest request){
+            @RequestBody ShortenRequest request){
 
-        String code =
-                urlService.createShortUrl(request.getUrl());
-
+         String shortCode= urlService.createShortUrl(request);
         return UrlResponse.builder()
-                .shortUrl(
-                        "http://localhost:8080/" + code)
+                .shortCode(shortCode)
+                .shortUrl("http://localhost:8080/" + shortCode)
                 .build();
+
+
     }
     @GetMapping("/{code}")
     public ResponseEntity<Void> redirect(@PathVariable String code) {

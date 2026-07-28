@@ -1,5 +1,6 @@
 package com.url.shortener.service;
 
+import com.url.shortener.dto.ShortenRequest;
 import com.url.shortener.dto.UrlClickEvent;
 import com.url.shortener.entity.Url;
 import com.url.shortener.producer.UrlEventProducer;
@@ -21,16 +22,29 @@ public class UrlService {
     private final StringRedisTemplate redisTemplate;
     private final UrlEventProducer producer;
 
-    public String createShortUrl(String originalUrl) {
+    public String createShortUrl(ShortenRequest request) {
 
-        String shortCode =
-                UUID.randomUUID()
-                        .toString()
-                        .substring(0,6);
+        String shortCode;
 
+        if (request.getCustomCode() != null &&
+                !request.getCustomCode().isBlank()) {
+
+            shortCode = request.getCustomCode();
+
+        } else {
+
+            shortCode = UUID.randomUUID()
+                    .toString()
+                    .substring(0,6);
+        }
+        if (repository.findByShortCode(shortCode).isPresent()) {
+
+            throw new RuntimeException("Short code already exists.");
+
+        }
         Url url = Url.builder()
                 .shortCode(shortCode)
-                .originalUrl(originalUrl)
+                .originalUrl(request.getOriginalUrl())
                 .createdAt(LocalDateTime.now())
                 .build();
 
