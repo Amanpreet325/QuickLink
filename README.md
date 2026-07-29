@@ -1,155 +1,286 @@
-🔗 URL Shortener - Scalable URL Shortening Service
+# 🔗 URL Shortener
 
-A production-inspired URL Shortener built with Spring Boot that demonstrates backend engineering concepts such as Redis caching, Kafka event streaming, analytics, rate limiting, custom short URLs, and URL expiration.
+A production-inspired URL Shortener built with **Spring Boot** that demonstrates scalable backend development using **Redis, Apache Kafka, PostgreSQL, Docker, and Spring Boot**.
 
-This project is designed to go beyond CRUD and showcase how real-world backend services are built.
+This project goes beyond a basic CRUD application by implementing caching, event-driven architecture, analytics, rate limiting, custom short URLs, and URL expiration.
 
-🚀 Features
-🔗 Generate short URLs
-✨ Custom short codes
-⏳ URL expiration support
-⚡ Redis caching for fast lookups
-📊 Click analytics
-📨 Kafka event publishing & consumption
-🛡️ Rate limiting
-🗄️ PostgreSQL persistence
-🐳 Docker support for Redis & Kafka
-🛠️ Tech Stack
-Technology	Purpose
-Java 21	Programming Language
-Spring Boot	Backend Framework
-Spring Web	REST APIs
-Spring Data JPA	Database Access
-PostgreSQL	Persistent Storage
-Redis	Cache Layer
-Apache Kafka	Event Streaming
-Docker	Containerization
-Maven	Dependency Management
-Lombok	Boilerplate Reduction
-🏗️ Architecture
-                        Client
-                           │
-                           ▼
-                   Spring Boot API
-                           │
-          ┌────────────────┴────────────────┐
-          │                                 │
-          ▼                                 ▼
-      Redis Cache                    PostgreSQL
-   (Fast Read Layer)             (Persistent Storage)
-          │                                 ▲
-          └──────────────┬──────────────────┘
-                         │
-                         ▼
-                  Kafka Producer
-                         │
-                  url-click-events
-                         │
-                         ▼
-                  Kafka Consumer
-                         │
-                         ▼
-                 Click Analytics
-⚙️ How It Works
-Creating a Short URL
-User submits an original URL.
-Optionally provides a custom short code.
-Application validates the request.
-URL is stored in PostgreSQL.
-Short URL is returned.
-Redirecting
-User visits the short URL.
-Application first checks Redis.
-If found → Redirect immediately.
-If not found:
-Read from PostgreSQL
-Store in Redis
-Publish Kafka event
-Redirect user
-Analytics
+---
 
-Whenever a short URL is accessed:
+## 🚀 Features
 
-Kafka publishes a click event
-Consumer receives the event
-Click information is stored
-Analytics can be generated later
-📂 Project Structure
+- ✅ Generate short URLs
+- ✅ Custom short codes
+- ✅ URL expiration support
+- ✅ Redis caching for ultra-fast lookups
+- ✅ Kafka event publishing
+- ✅ Click analytics
+- ✅ Rate limiting
+- ✅ PostgreSQL persistence
+- ✅ Dockerized Redis & Kafka
+
+---
+
+## 🏗️ Architecture
+
+```
+                    Client
+                       │
+                       ▼
+              Spring Boot REST API
+                       │
+        ┌──────────────┴──────────────┐
+        │                             │
+        ▼                             ▼
+     Redis Cache                 PostgreSQL
+  (Fast Read Layer)         (Persistent Storage)
+        │                             ▲
+        └──────────────┬──────────────┘
+                       │
+                       ▼
+               Apache Kafka Producer
+                       │
+                url-click-events
+                       │
+                       ▼
+               Apache Kafka Consumer
+                       │
+                       ▼
+                Click Analytics
+```
+
+---
+
+## 🛠 Tech Stack
+
+| Technology | Usage |
+|------------|-------|
+| Java 21 | Programming Language |
+| Spring Boot | Backend Framework |
+| Spring Web | REST APIs |
+| Spring Data JPA | ORM |
+| PostgreSQL | Database |
+| Redis | Caching |
+| Apache Kafka | Event Streaming |
+| Docker | Containerization |
+| Maven | Build Tool |
+| Lombok | Boilerplate Reduction |
+
+---
+
+## 📂 Project Structure
+
+```
 src
- ├── controller
- ├── service
- ├── repository
- ├── entity
- ├── dto
- ├── producer
- ├── consumer
- ├── config
- ├── exception
- └── analytics
-📡 API Endpoints
-Method	Endpoint	Description
-POST	/shorten	Create short URL
-GET	/{code}	Redirect to original URL
-GET	/analytics/{code}	View click analytics
-📨 Sample Request
+│
+├── config
+├── controller
+├── dto
+├── entity
+├── exception
+├── repository
+├── service
+├── producer
+├── consumer
+└── analytics
+```
+
+---
+
+## 📌 API Endpoints
+
+| Method | Endpoint | Description |
+|---------|----------|-------------|
+| POST | `/shorten` | Create Short URL |
+| GET | `/{code}` | Redirect to Original URL |
+| GET | `/analytics/{code}` | Get Click Analytics |
+
+---
+
+## 📥 Sample Request
+
+### Create Short URL
+
+```http
 POST /shorten
+```
+
+```json
 {
-  "originalUrl": "https://www.youtube.com",
-  "customCode": "youtube",
-  "expiresAt": "2026-12-31T23:59:59"
+    "originalUrl": "https://www.youtube.com",
+    "customCode": "youtube",
+    "expiresAt": "2026-12-31T23:59:59"
 }
-Response
+```
+
+### Response
+
+```json
 {
-  "shortCode": "youtube",
-  "shortUrl": "http://localhost:8080/youtube"
+    "shortCode": "youtube",
+    "shortUrl": "http://localhost:8080/youtube"
 }
-📊 Implemented Features
-✅ URL Shortening
-✅ Custom Short URLs
-✅ URL Expiration
-✅ PostgreSQL Integration
-✅ Redis Caching
-✅ Kafka Producer
-✅ Kafka Consumer
-✅ Click Analytics
-✅ Rate Limiting
-✅ Docker Setup
-🚧 Planned Improvements
-Global Exception Handling
-Swagger / OpenAPI Documentation
-Scheduled Cleanup of Expired URLs
-Docker Compose
-Prometheus & Grafana Monitoring
-JWT Authentication
-User Accounts
-Deploy on Cloud (AWS / Railway / Render)
-Separate Analytics Microservice
-💡 Backend Concepts Demonstrated
-RESTful API Design
-Layered Architecture
-Caching Strategies (Redis)
-Event-Driven Architecture (Kafka)
-Database Persistence
-Request Validation
-Rate Limiting
-DTO Pattern
-Builder Pattern
-Custom Exceptions
-Docker-based Development
-▶️ Getting Started
-Clone the repository
-git clone https://github.com/<your-username>/url-shortener.git
+```
+
+---
+
+## ⚡ Request Flow
+
+### URL Creation
+
+```
+Client
+   │
+   ▼
+Controller
+   │
+   ▼
+Service
+   │
+   ▼
+Generate / Validate Short Code
+   │
+   ▼
+Save to PostgreSQL
+   │
+   ▼
+Return Short URL
+```
+
+---
+
+### URL Redirection
+
+```
+Client
+   │
+   ▼
+Controller
+   │
+   ▼
+Check Redis Cache
+   │
+ ┌─┴─────────────┐
+ │               │
+Hit             Miss
+ │               │
+ ▼               ▼
+Redirect     PostgreSQL
+                 │
+                 ▼
+           Store in Redis
+                 │
+                 ▼
+         Publish Kafka Event
+                 │
+                 ▼
+              Redirect
+```
+
+---
+
+## 📊 Analytics Flow
+
+```
+User Clicks URL
+        │
+        ▼
+Kafka Producer
+        │
+        ▼
+url-click-events
+        │
+        ▼
+Kafka Consumer
+        │
+        ▼
+Store Click Analytics
+```
+
+---
+
+## ✨ Implemented Features
+
+- URL Shortening
+- Custom Short URLs
+- URL Expiration
+- Redis Cache
+- Kafka Producer
+- Kafka Consumer
+- Click Analytics
+- Rate Limiting
+- PostgreSQL Integration
+- Docker Integration
+
+---
+
+## 🚧 Upcoming Features
+
+- Global Exception Handling
+- Swagger / OpenAPI Documentation
+- Scheduled Cleanup for Expired URLs
+- Docker Compose
+- Prometheus + Grafana Monitoring
+- JWT Authentication
+- User Accounts
+- Cloud Deployment
+- Analytics Microservice
+
+---
+
+## ▶️ Getting Started
+
+### Clone the repository
+
+```bash
+git clone https://github.com/your-username/url-shortener.git
 cd url-shortener
-Start PostgreSQL, Redis and Kafka
+```
 
-Ensure PostgreSQL is running locally and start Redis and Kafka using Docker.
+### Start Dependencies
 
-Run the application
+- PostgreSQL
+- Redis
+- Kafka
+
+(or run them using Docker)
+
+### Run the application
+
+```bash
 mvn spring-boot:run
+```
 
-The application will be available at:
+Application starts on:
 
+```
 http://localhost:8080
-📄 License
+```
 
-This project is built for learning, backend practice, and demonstrating scalable system design concepts. Feel free to fork it, explore it, and build upon it.
+---
+
+## 💻 Backend Concepts Demonstrated
+
+- Layered Architecture
+- REST API Design
+- DTO Pattern
+- Builder Pattern
+- Redis Caching
+- Event-Driven Architecture
+- Kafka Messaging
+- Database Optimization
+- Request Validation
+- Rate Limiting
+- Custom Exceptions
+- Docker-based Development
+
+---
+
+## 👨‍💻 Author
+
+**Amanpreet Singh**
+
+Backend Developer | Java | Spring Boot | Microservices | Kafka | Redis | PostgreSQL
+
+---
+
+⭐ If you found this project useful, consider giving it a star!
