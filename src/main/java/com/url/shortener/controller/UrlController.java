@@ -48,4 +48,13 @@ public class UrlController {
 
         return new ResponseEntity<>(headers, HttpStatus.FOUND);
     }
+
+    @DeleteMapping("/{code}")
+    public ResponseEntity<String> deleteUrl(
+            @PathVariable String code) {
+
+        urlService.deleteUrl(code);
+
+        return ResponseEntity.ok("URL deleted successfully.");
+    }
 }

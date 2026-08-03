@@ -5,12 +5,14 @@ import com.url.shortener.dto.UrlClickEvent;
 import com.url.shortener.entity.Url;
 import com.url.shortener.exception.ShortCodeAlreadyExistsException;
 import com.url.shortener.exception.UrlExpiredException;
+import com.url.shortener.exception.UrlNotFoundException;
 import com.url.shortener.producer.UrlEventProducer;
 import com.url.shortener.repository.UrlRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -74,7 +76,8 @@ public class UrlService {
         }
 
         Url entity = repository.findByShortCode(code)
-                .orElseThrow();
+                .orElseThrow(() ->
+                        new UrlNotFoundException());
 
         if (entity.getExpiresAt() != null &&
                 entity.getExpiresAt().isBefore(LocalDateTime.now())) {
@@ -93,5 +96,19 @@ public class UrlService {
                         .build();
         producer.publish(event);
         return entity.getOriginalUrl();
+    }
+
+    @Transactional
+    public void deleteUrl(String code) {
+
+        Url entity = repository.findByShortCode(code)
+                .orElseThrow(() ->
+                        new UrlNotFoundException());
+
+        redisTemplate.delete(code);
+
+        repository.delete(entity);
+
+
     }
 }
